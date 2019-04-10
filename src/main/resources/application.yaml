@@ -1,0 +1,12 @@
+spring:
+  
+  application:
+    name: integrations-service-broker
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: ${spring.application.name}
+      authentication-database: admin
+      username: admin
+      password: admin
