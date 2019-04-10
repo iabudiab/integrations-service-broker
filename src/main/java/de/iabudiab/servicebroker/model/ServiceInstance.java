@@ -1,5 +1,6 @@
 package de.iabudiab.servicebroker.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.servicebroker.model.instance.OperationState;
@@ -21,7 +22,8 @@ public class ServiceInstance {
 
 	private String planId;
 
-	private Map<String, Object> parameters;
+	@Builder.Default
+	private Map<String, Object> parameters = new HashMap<>();
 
 	private Operation operation;
 
