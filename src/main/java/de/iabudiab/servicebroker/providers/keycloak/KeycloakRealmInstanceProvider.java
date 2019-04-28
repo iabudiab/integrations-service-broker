@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceExistsException;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;
 import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
@@ -59,7 +60,8 @@ public class KeycloakRealmInstanceProvider implements ServiceInstanceProvider {
 	}
 
 	@Override
-	public DeleteServiceInstanceResponse deleteServiceInstance(ServiceInstance serviceInstance) {
+	public DeleteServiceInstanceResponse deleteServiceInstance(ServiceInstance serviceInstance,
+			List<ServiceInstanceBinding> serviceBindings) {
 		String realmName = serviceInstance.getServiceInstanceId();
 		administration.deleteRealm(realmName);
 
@@ -82,6 +84,13 @@ public class KeycloakRealmInstanceProvider implements ServiceInstanceProvider {
 
 	@Override
 	public CreateServiceInstanceBindingResponse createServiceInstanceBinding(ServiceInstanceBinding serviceBinding) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DeleteServiceInstanceBindingResponse deleteServiceInstanceBinding(
+			ServiceInstanceBinding serviceInstanceBinding) {
 		// TODO Auto-generated method stub
 		return null;
 	}
