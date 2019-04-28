@@ -114,9 +114,13 @@ public class IntegrationsCatalog implements ServiceInstanceService, ServiceInsta
 		ServiceInstance serviceInstance = instanceRepository.findById(serviceInstanceId)//
 				.orElseThrow(() -> new ServiceInstanceDoesNotExistException(serviceInstanceId));
 
+		List<ServiceInstanceBinding> serviceBindings = bindingRepository.findByServiceInstanceId(serviceInstanceId);
+
 		DeleteServiceInstanceResponse response = providers.get(serviceDefinitionId)
-				.deleteServiceInstance(serviceInstance);
+				.deleteServiceInstance(serviceInstance, serviceBindings);
+
 		instanceRepository.delete(serviceInstance);
+		bindingRepository.deleteAll(serviceBindings);
 
 		return response;
 	}
