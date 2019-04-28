@@ -10,3 +10,11 @@ spring:
       authentication-database: admin
       username: admin
       password: admin
+
+keycloak:
+  server-url: localhost
+  realm: master
+  client-id: admin
+  client-secret: admin
+  username: admin
+  password: admin
