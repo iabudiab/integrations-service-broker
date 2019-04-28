@@ -21,6 +21,8 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceRequest;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
+import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceRequest;
+import org.springframework.cloud.servicebroker.model.instance.GetServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.service.CatalogService;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceBindingService;
 import org.springframework.cloud.servicebroker.service.ServiceInstanceService;
@@ -89,6 +91,19 @@ public class IntegrationsCatalog implements ServiceInstanceService, ServiceInsta
 		instanceRepository.save(instance);
 
 		return response;
+	}
+
+	@Override
+	public GetServiceInstanceResponse getServiceInstance(GetServiceInstanceRequest request) {
+		String serviceInstanceId = request.getServiceInstanceId();
+		ServiceInstance instance = instanceRepository.findById(serviceInstanceId) //
+				.orElseThrow(() -> new ServiceInstanceDoesNotExistException(serviceInstanceId));
+
+		return GetServiceInstanceResponse.builder() //
+				.serviceDefinitionId(instance.getServiceDefinitionId()) //
+				.planId(instance.getPlanId()) //
+				.parameters(Optional.ofNullable(instance.getParameters()).orElse(Map.of())) //
+				.build();
 	}
 
 	@Override
