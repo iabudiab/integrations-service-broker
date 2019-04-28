@@ -143,6 +143,7 @@ public class IntegrationsCatalog implements ServiceInstanceService, ServiceInsta
 
 		ServiceInstanceBinding instanceBinding = ServiceInstanceBinding.builder() //
 				.id(bindingId) //
+				.serviceDefinitionId(serviceDefinitionId) //
 				.serviceInstanceId(serviceInstanceId) //
 				.parameters(request.getParameters()) //
 				.build();

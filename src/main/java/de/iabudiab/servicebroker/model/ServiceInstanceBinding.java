@@ -17,6 +17,8 @@ public class ServiceInstanceBinding {
 	@Id
 	private String id;
 
+	private String serviceDefinitionId;
+
 	private String serviceInstanceId;
 
 	@Builder.Default
