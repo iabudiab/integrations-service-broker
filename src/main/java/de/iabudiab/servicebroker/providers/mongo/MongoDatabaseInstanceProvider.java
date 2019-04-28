@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceExistsException;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;
 import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
@@ -45,6 +46,8 @@ public class MongoDatabaseInstanceProvider implements ServiceInstanceProvider {
 				.description("MongoDB Database") //
 				.tags("db", "nosql") //
 				.bindable(true) //
+				.instancesRetrievable(true) //
+				.bindingsRetrievable(false) //
 				.plans(List.of(defaultPlan)) //
 				.build();
 	}
@@ -64,8 +67,20 @@ public class MongoDatabaseInstanceProvider implements ServiceInstanceProvider {
 	}
 
 	@Override
-	public DeleteServiceInstanceResponse deleteServiceInstance(ServiceInstance serviceInstance) {
+	public DeleteServiceInstanceResponse deleteServiceInstance(ServiceInstance serviceInstance,
+			List<ServiceInstanceBinding> serviceBindings) {
 		String databaseName = serviceInstance.getServiceInstanceId();
+
+		for (ServiceInstanceBinding binding : serviceBindings) {
+			String username = Optional.ofNullable(binding.getParameters()) //
+					.map(params -> params.get("username")) //
+					.filter(it -> String.class.isAssignableFrom(it.getClass())) //
+					.map(String.class::cast) //
+					.orElseGet(() -> binding.getId());
+
+			administration.deleteUserForDatabase(databaseName, username);
+		}
+
 		administration.deleteDatabase(databaseName);
 
 		return DeleteServiceInstanceResponse.builder()//
@@ -89,10 +104,7 @@ public class MongoDatabaseInstanceProvider implements ServiceInstanceProvider {
 	public CreateServiceInstanceBindingResponse createServiceInstanceBinding(ServiceInstanceBinding serviceBinding) {
 		String databaseName = serviceBinding.getServiceInstanceId();
 
-		String username = Optional.ofNullable(serviceBinding.getParameters().get("username")) //
-				.filter(it -> String.class.isAssignableFrom(it.getClass())) //
-				.map(String.class::cast) //
-				.orElse(serviceBinding.getId());
+		String username = getUsernameParameter(serviceBinding);
 
 		String password = Optional.ofNullable(serviceBinding.getParameters().get("password")) //
 				.filter(it -> String.class.isAssignableFrom(it.getClass())) //
@@ -106,6 +118,27 @@ public class MongoDatabaseInstanceProvider implements ServiceInstanceProvider {
 				.async(false) //
 				.credentials(credentials) //
 				.build();
+	}
+
+	@Override
+	public DeleteServiceInstanceBindingResponse deleteServiceInstanceBinding(ServiceInstanceBinding serviceBinding) {
+		String databaseName = serviceBinding.getServiceInstanceId();
+
+		String username = getUsernameParameter(serviceBinding);
+
+		administration.deleteUserForDatabase(databaseName, username);
+
+		return DeleteServiceInstanceBindingResponse.builder() //
+				.async(false) //
+				.build();
+	}
+
+	private String getUsernameParameter(ServiceInstanceBinding serviceBinding) {
+		String username = Optional.ofNullable(serviceBinding.getParameters().get("username")) //
+				.filter(it -> String.class.isAssignableFrom(it.getClass())) //
+				.map(String.class::cast) //
+				.orElse(serviceBinding.getId());
+		return username;
 	}
 
 	private String generatePassword(int length) {

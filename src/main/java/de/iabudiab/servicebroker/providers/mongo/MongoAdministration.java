@@ -44,7 +44,7 @@ public class MongoAdministration {
 		Document grantOwnerCommand = new Document("grantRolesToUser", properties.getUsername()).append("roles",
 				List.of(roles));
 		adminDatabase.runCommand(grantOwnerCommand);
-		log.debug("Granted dbOwner to {} on: {}", properties.getPassword(), databaseName);
+		log.debug("Granted dbOwner to {} on: {}", properties.getUsername(), databaseName);
 
 		MongoDatabase newDatabase = client.getDatabase(databaseName);
 		MongoCollection<Document> collection = newDatabase.getCollection("welcome");
@@ -103,7 +103,7 @@ public class MongoAdministration {
 				"MONGODB_USERNAME", username, //
 				"MONGODB_PASSOWRD", password, //
 				"MONGODB_DATABASE", databaseName, //
-				"MONGODB_AUTHENTICATION_DATABASE", properties.getAuthenticationDatabase() //
+				"MONGODB_AUTHENTICATION_DATABASE", databaseName //
 		);
 
 		return credentials;
