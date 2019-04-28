@@ -133,6 +133,10 @@ public class IntegrationsCatalog implements ServiceInstanceService, ServiceInsta
 		String serviceInstanceId = request.getServiceInstanceId();
 		String serviceDefinitionId = request.getServiceDefinitionId();
 
+		if (!instanceRepository.existsById(serviceInstanceId)) {
+			throw new ServiceInstanceDoesNotExistException(serviceInstanceId);
+		}
+
 		if (bindingRepository.existsById(bindingId)) {
 			throw new ServiceInstanceBindingExistsException(serviceInstanceId, bindingId);
 		}
