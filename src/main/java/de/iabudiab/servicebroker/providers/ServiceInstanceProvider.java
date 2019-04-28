@@ -1,6 +1,9 @@
 package de.iabudiab.servicebroker.providers;
 
+import java.util.List;
+
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingResponse;
+import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingResponse;
 import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceResponse;
 import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInstanceResponse;
@@ -16,11 +19,15 @@ public interface ServiceInstanceProvider {
 
 	CreateServiceInstanceResponse createServiceInstance(ServiceInstance serviceInstance);
 
-	DeleteServiceInstanceResponse deleteServiceInstance(ServiceInstance serviceInstance);
+	DeleteServiceInstanceResponse deleteServiceInstance(ServiceInstance serviceInstance,
+			List<ServiceInstanceBinding> serviceInstanceBindings);
 
 	UpdateServiceInstanceResponse updateServiceInstance(ServiceInstance serviceInstance);
 
 	GetLastServiceOperationResponse getLastOperation(ServiceInstance serviceInstance);
 
-	CreateServiceInstanceBindingResponse createServiceInstanceBinding(ServiceInstanceBinding serviceBinding);
+	CreateServiceInstanceBindingResponse createServiceInstanceBinding(ServiceInstanceBinding serviceInstanceBinding);
+
+	DeleteServiceInstanceBindingResponse deleteServiceInstanceBinding(ServiceInstanceBinding serviceInstanceBinding);
+
 }
