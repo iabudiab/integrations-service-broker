@@ -159,6 +159,22 @@ public class IntegrationsCatalog implements ServiceInstanceService, ServiceInsta
 	@Override
 	public DeleteServiceInstanceBindingResponse deleteServiceInstanceBinding(
 			DeleteServiceInstanceBindingRequest request) {
-		return null;
+		String bindingId = request.getBindingId();
+		String serviceInstanceId = request.getServiceInstanceId();
+
+		if (!instanceRepository.existsById(serviceInstanceId)) {
+			throw new ServiceInstanceDoesNotExistException(serviceInstanceId);
+		}
+
+		ServiceInstanceBinding instanceBinding = bindingRepository.findById(bindingId) //
+				.orElseThrow(() -> new ServiceInstanceBindingExistsException(serviceInstanceId, bindingId));
+
+		String serviceDefinitionId = instanceBinding.getServiceDefinitionId();
+		DeleteServiceInstanceBindingResponse response = providers.get(serviceDefinitionId)
+				.deleteServiceInstanceBinding(instanceBinding);
+
+		bindingRepository.delete(instanceBinding);
+
+		return response;
 	}
 }
