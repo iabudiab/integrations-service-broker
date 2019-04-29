@@ -6,10 +6,10 @@ import java.util.Map;
 
 import org.bson.Document;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
+import org.springframework.cloud.servicebroker.exception.ServiceBrokerException;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
@@ -61,31 +61,27 @@ public class MongoAdministration {
 
 	public void createUserForDatabase(String databaseName, String username, String password) {
 		log.debug("Creating new user {} for: {}", username, databaseName);
-		try {
-			MongoDatabase database = client.getDatabase(databaseName);
+		MongoDatabase database = client.getDatabase(databaseName);
 
-			Document role = new Document("role", "readWrite").append("db", databaseName);
-			Document createUserCommand = new Document("createUser", username) //
-					.append("pwd", password) //
-					.append("roles", List.of(role));
+		Document role = new Document("role", "readWrite").append("db", databaseName);
+		Document createUserCommand = new Document("createUser", username) //
+				.append("pwd", password) //
+				.append("roles", List.of(role));
 
-			Document result = database.runCommand(createUserCommand);
-			// TODO handle result
-		} catch (MongoException e) {
-			// TODO
+		Document result = database.runCommand(createUserCommand);
+		if (result.getDouble("ok") != 1.0d) {
+			throw new ServiceBrokerException("Error creating user for database " + databaseName);
 		}
 	}
 
 	public void deleteUserForDatabase(String databaseName, String username) {
 		log.debug("Deleting user {} for: {}", username, databaseName);
-		try {
-			MongoDatabase database = client.getDatabase(databaseName);
+		MongoDatabase database = client.getDatabase(databaseName);
 
-			Document deleteUserCommand = new Document("dropUser", username);
-			Document result = database.runCommand(deleteUserCommand);
-			// TODO handle result
-		} catch (MongoException e) {
-			// TODO
+		Document deleteUserCommand = new Document("dropUser", username);
+		Document result = database.runCommand(deleteUserCommand);
+		if (result.getDouble("ok") != 1.0d) {
+			throw new ServiceBrokerException("Error deleting user for database " + databaseName);
 		}
 	}
 
