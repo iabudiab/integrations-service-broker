@@ -1,7 +1,5 @@
 package de.iabudiab.servicebroker.providers.mongo;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +20,7 @@ import de.iabudiab.servicebroker.annotation.ServiceInstanceProviderType;
 import de.iabudiab.servicebroker.model.ServiceInstance;
 import de.iabudiab.servicebroker.model.ServiceInstanceBinding;
 import de.iabudiab.servicebroker.providers.ServiceInstanceProvider;
+import de.iabudiab.servicebroker.util.ServiceUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -104,12 +103,12 @@ public class MongoDatabaseInstanceProvider implements ServiceInstanceProvider {
 	public CreateServiceInstanceBindingResponse createServiceInstanceBinding(ServiceInstanceBinding serviceBinding) {
 		String databaseName = serviceBinding.getServiceInstanceId();
 
-		String username = getUsernameParameter(serviceBinding);
+		String username = ServiceUtils.getUsernameParameter(serviceBinding);
 
 		String password = Optional.ofNullable(serviceBinding.getParameters().get("password")) //
 				.filter(it -> String.class.isAssignableFrom(it.getClass())) //
 				.map(String.class::cast) //
-				.orElseGet(() -> generatePassword(64));
+				.orElseGet(() -> ServiceUtils.generatePassword(64));
 
 		administration.createUserForDatabase(databaseName, username, password);
 		Map<String, Object> credentials = administration.getCredentialsFor(databaseName, username, password);
@@ -124,27 +123,12 @@ public class MongoDatabaseInstanceProvider implements ServiceInstanceProvider {
 	public DeleteServiceInstanceBindingResponse deleteServiceInstanceBinding(ServiceInstanceBinding serviceBinding) {
 		String databaseName = serviceBinding.getServiceInstanceId();
 
-		String username = getUsernameParameter(serviceBinding);
+		String username = ServiceUtils.getUsernameParameter(serviceBinding);
 
 		administration.deleteUserForDatabase(databaseName, username);
 
 		return DeleteServiceInstanceBindingResponse.builder() //
 				.async(false) //
 				.build();
-	}
-
-	private String getUsernameParameter(ServiceInstanceBinding serviceBinding) {
-		String username = Optional.ofNullable(serviceBinding.getParameters().get("username")) //
-				.filter(it -> String.class.isAssignableFrom(it.getClass())) //
-				.map(String.class::cast) //
-				.orElse(serviceBinding.getId());
-		return username;
-	}
-
-	private String generatePassword(int length) {
-		SecureRandom secureRandom = new SecureRandom();
-		byte[] token = new byte[length];
-		secureRandom.nextBytes(token);
-		return new BigInteger(1, token).toString(16);
 	}
 }

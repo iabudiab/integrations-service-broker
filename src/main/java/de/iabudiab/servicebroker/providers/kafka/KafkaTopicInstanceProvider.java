@@ -2,7 +2,6 @@ package de.iabudiab.servicebroker.providers.kafka;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceExistsException;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceAppBindingResponse;
@@ -20,6 +19,7 @@ import de.iabudiab.servicebroker.annotation.ServiceInstanceProviderType;
 import de.iabudiab.servicebroker.model.ServiceInstance;
 import de.iabudiab.servicebroker.model.ServiceInstanceBinding;
 import de.iabudiab.servicebroker.providers.ServiceInstanceProvider;
+import de.iabudiab.servicebroker.util.ServiceUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -88,7 +88,7 @@ public class KafkaTopicInstanceProvider implements ServiceInstanceProvider {
 			ServiceInstanceBinding serviceBinding) {
 		String topicName = serviceBinding.getServiceInstanceId();
 
-		String username = getUsernameParameter(serviceBinding);
+		String username = ServiceUtils.getUsernameParameter(serviceBinding);
 
 		administration.createAclForTopic(topicName, username);
 		Map<String, Object> credentials = administration.getCredentialsFor(topicName, username);
@@ -104,20 +104,12 @@ public class KafkaTopicInstanceProvider implements ServiceInstanceProvider {
 			ServiceInstanceBinding serviceBinding) {
 		String topicName = serviceBinding.getServiceInstanceId();
 
-		String username = getUsernameParameter(serviceBinding);
+		String username = ServiceUtils.getUsernameParameter(serviceBinding);
 
 		administration.deleteAclForTopic(topicName, username);
 
 		return DeleteServiceInstanceBindingResponse.builder() //
 				.async(false) //
 				.build();
-	}
-
-	private String getUsernameParameter(ServiceInstanceBinding serviceBinding) {
-		String username = Optional.ofNullable(serviceBinding.getParameters().get("username")) //
-				.filter(it -> String.class.isAssignableFrom(it.getClass())) //
-				.map(String.class::cast) //
-				.orElse(serviceBinding.getId());
-		return username;
 	}
 }
